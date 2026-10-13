@@ -1,0 +1,34 @@
+# dependencies (bun install)
+node_modules
+
+# output
+out
+dist
+*.tgz
+.ilha
+.celld
+.wrangler
+.dev.vars
+.dev.vars*
+
+# code coverage
+coverage
+*.lcov
+
+# logs
+logs
+*.log
+
+# dotenv environment variable files
+.env
+.env.*
+!.env.example
+
+# caches
+.eslintcache
+.cache
+*.tsbuildinfo
+
+# editors
+.idea
+.DS_Store
