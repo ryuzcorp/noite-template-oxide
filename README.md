@@ -49,23 +49,27 @@ bun run typecheck  # builds first: tsc reads the generated route types
   `action()` and call it from the client like a local function.
 - `src/client.ts` — client entry (CSS + page router mount).
 - `src/server.ts` — server entry: custom routes and `setFrameAuth`.
-- `src/worker.ts` — what `wrangler.jsonc` `main` points at; oxide owns it.
+- `src/worker.ts` — the Worker entry `cloudflare.config.ts` points at; oxide owns it.
+- `cloudflare.config.ts` — the Worker: name, compatibility, assets, bindings.
 
 ## Bindings
 
-`wrangler.jsonc` declares the Worker (name, compatibility, D1). The template
-ships one commented D1 example; uncomment the block and add `DB?: D1Database`
-to `AppEnv` in `src/env.d.ts` to use it:
+`cloudflare.config.ts` declares the Worker with the typed helpers from
+`cf/config` (the [`cf` CLI](https://github.com/cloudflare/cf)'s config) instead
+of a `wrangler.jsonc`. The template ships one commented D1 example; uncomment it
+and add `DB?: D1Database` to `AppEnv` in `src/env.d.ts` to use it:
 
-```jsonc
-"d1_databases": [{ "binding": "DB", "database_name": "app-db" }]
+```ts
+env: {
+  DB: bindings.d1({ name: "app-db" }),
+},
 ```
 
 The platform provisions the database per app on first deploy. Bindings are
 read from the built config, so run `bun run build` after editing them.
 
 Secrets: set them as env vars on the app (Noite passes them to the build and
-the fleet), never in `wrangler.jsonc`.
+the fleet), never in `cloudflare.config.ts`.
 
 ## Stack
 
