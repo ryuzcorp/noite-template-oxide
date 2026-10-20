@@ -1,8 +1,8 @@
-# Oxide + Ilha starter
+# Ilha + Void on Noite
 
-A [Noite](https://github.com/ryuzcorp/noite) app template: [Oxide](https://oxide.build)
-server actions, [Ilha](https://github.com/ilhajs/ilha) pages and islands,
-built with Vite + `@cloudflare/vite-plugin` and served by celld.
+A [Noite](https://github.com/ryuzcorp/noite) app template: server-rendered
+[Ilha](https://ilha.build) pages on [Void](https://void.cloud), built with
+Vite and served by celld.
 
 ## Deploy on Noite
 
@@ -25,9 +25,10 @@ bun install
 bun run build
 ```
 
-`vite build` writes `dist/wrangler.json` (a celld-ready config), the Worker at
-`dist/celld/entry.js` and the client assets under `dist/client/`. Noite picks
-that config up automatically — there is nothing to configure for a deploy.
+`vite build` writes `dist/wrangler.json` (a celld-ready config derived from
+Void's own `dist/ssr/wrangler.json`), the Worker under `dist/ssr/` and the
+client assets under `dist/client/`. Noite picks that config up automatically
+— there is nothing to configure for a deploy.
 
 If the project pins `packageManager` in `package.json`, Noite installs with
 that; otherwise a lockfile decides (`bun.lock` here), defaulting to bun.
@@ -36,48 +37,45 @@ that; otherwise a lockfile decides (`bun.lock` here), defaulting to bun.
 
 ```sh
 bun install
-bun run dev        # vite + workerd (local D1/R2, HMR)
+bun run dev        # Vite dev server on http://localhost:5173
 bun run typecheck  # builds first: tsc reads the generated route types
+bun run test       # component tests with ilha/test
 ```
 
 ## Pages and islands
 
-- `src/pages/*.tsx` — file-based pages (`/` is `src/pages/index.tsx`).
-- `src/lib/*.server.tsx` — server islands: exported `function` components
-  render on the server and stream into the page.
-- `src/lib/*.server.ts` — server actions: export a function wrapped in
-  `action()` and call it from the client like a local function.
-- `src/client.ts` — client entry (CSS + page router mount).
-- `src/server.ts` — server entry: custom routes and `setFrameAuth`.
-- `src/worker.ts` — the Worker entry `cloudflare.config.ts` points at; oxide owns it.
-- `cloudflare.config.ts` — the Worker: name, compatibility, assets, bindings.
+- `pages/*.tsx` — file-based pages (`/` is `pages/index.tsx`).
+- `pages/*.server.ts` — loaders and actions: they run in the Worker, and the
+  page reads them as props (`InferProps`) or calls them through `useForm`.
+- `pages/*.island.tsx` — island pages: Void sends static HTML, and only the
+  imported islands (`.tsx` with `with { island: "load" }`) ship JavaScript.
+- `pages/layout.tsx` — wraps every page; keeps its state across navigations.
+- `void.config.ts` — the Worker: name, compatibility date, bindings.
 
 ## Bindings
 
-`cloudflare.config.ts` declares the Worker with the typed helpers from
-`cf/config` (the [`cf` CLI](https://github.com/cloudflare/cf)'s config) instead
-of a `wrangler.jsonc`. The template ships one commented D1 example; uncomment it
-and add `DB?: D1Database` to `AppEnv` in `src/env.d.ts` to use it:
+`void.config.ts` declares the Worker in its `cloudflare` section. The
+template ships a commented D1 example; uncomment it and run `bun run build`
+after editing (bindings are read from the built config):
 
 ```ts
-env: {
-  DB: bindings.d1({ name: "app-db" }),
-},
+d1_databases: [{ binding: "DB", database_name: "app-db" }],
 ```
 
-The platform provisions the database per app on first deploy. Bindings are
-read from the built config, so run `bun run build` after editing them.
+The platform provisions the database per app on first deploy. Read it in a
+server module with `env.DB` from `cloudflare:workers`.
 
 Secrets: set them as env vars on the app (Noite passes them to the build and
-the fleet), never in `cloudflare.config.ts`.
+the fleet), never in `void.config.ts`.
 
 ## Stack
 
 | Piece | Version |
 | --- | --- |
-| oxidejs | ^0.6.1 |
-| ilha / @ilha/router | ^0.15.2 / ^0.11.16 |
-| vite | ^8.3.4 |
+| ilha / @ilha/void | ^0.16.0 / ^0.1.4 |
+| void | ^1.1.12 |
+| effect | ^4 |
+| vite | ^8 |
 
 ## License
 

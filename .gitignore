@@ -5,11 +5,15 @@ node_modules
 out
 dist
 *.tgz
-.ilha
-.celld
+.void
 .wrangler
 .dev.vars
 .dev.vars*
+
+# local environment
+.env
+.env.*
+!.env.example
 
 # code coverage
 coverage
@@ -18,11 +22,6 @@ coverage
 # logs
 logs
 *.log
-
-# dotenv environment variable files
-.env
-.env.*
-!.env.example
 
 # caches
 .eslintcache
