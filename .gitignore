@@ -5,11 +5,15 @@ node_modules
 out
 dist
 *.tgz
-.ilha
-.celld
+.void
 .wrangler
 .dev.vars
 .dev.vars*
+
+# local environment
+.env
+.env.*
+!.env.example
 
 # code coverage
 coverage
@@ -19,11 +23,6 @@ coverage
 logs
 *.log
 
-# dotenv environment variable files
-.env
-.env.*
-!.env.example
-
 # caches
 .eslintcache
 .cache
@@ -32,3 +31,6 @@ logs
 # editors
 .idea
 .DS_Store
+
+# void local state
+.void-wrangler.jsonc
