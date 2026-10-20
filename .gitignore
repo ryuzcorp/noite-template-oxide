@@ -31,3 +31,6 @@ logs
 # editors
 .idea
 .DS_Store
+
+# void local state
+.void-wrangler.jsonc
