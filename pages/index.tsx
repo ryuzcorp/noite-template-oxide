@@ -1,4 +1,5 @@
 import { Form, useForm } from "@ilha/void";
+import { atom, watch } from "ilha";
 
 import type { Props } from "./index.server.ts";
 
@@ -10,6 +11,17 @@ export default function Home({ todos }: Props) {
   // its body untyped (`Record<string, unknown>`): pass the URL as `string`
   // to use the untyped overload, typed from the defaults instead.
   const form = useForm("/" as string, { text: "" });
+  // The form is server-rendered in place, but its controlled input and
+  // submit handler exist only after the client hydrates: a fill or click
+  // before that is lost (the click falls back to a native GET submit). The
+  // controls stay disabled until then.
+  const mounted = atom(false);
+  watch.once(() => {
+    if (typeof window === "undefined") {
+      return;
+    }
+    mounted.set(true);
+  });
   return (
     <main class="flex flex-col gap-6">
       <header class="flex flex-col gap-2">
@@ -36,23 +48,25 @@ export default function Home({ todos }: Props) {
             <li key={todo.id}>{todo.text}</li>
           ))}
         </ul>
-        <Form form={form} class="flex gap-2">
-          <input
-            name="text"
-            aria-label="New todo"
-            placeholder="Something to do"
-            value={form.data.text}
-            oninput={(event) => form.setData("text", event.currentTarget.value)}
-            class="grow rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal outline-none focus:border-gray-900 dark:border-gray-700 dark:bg-gray-950 dark:focus:border-gray-100"
-          />
-          <button
-            type="submit"
-            disabled={form.pending}
-            class="w-fit rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-300"
-          >
-            Add
-          </button>
-        </Form>
+        <fieldset disabled={!mounted()} class="m-0 min-w-0 border-0 p-0">
+          <Form form={form} class="flex gap-2">
+            <input
+              name="text"
+              aria-label="New todo"
+              placeholder="Something to do"
+              value={form.data.text}
+              oninput={(event) => form.setData("text", event.currentTarget.value)}
+              class="grow rounded-md border border-gray-300 bg-white px-3 py-2 text-sm font-normal outline-none focus:border-gray-900 dark:border-gray-700 dark:bg-gray-950 dark:focus:border-gray-100"
+            />
+            <button
+              type="submit"
+              disabled={form.pending}
+              class="w-fit rounded-md bg-gray-900 px-3 py-2 text-sm font-medium text-white hover:bg-gray-700 disabled:opacity-50 dark:bg-gray-100 dark:text-gray-900 dark:hover:bg-gray-300"
+            >
+              Add
+            </button>
+          </Form>
+        </fieldset>
         {form.errors.text ? (
           <p class="text-sm text-red-600 dark:text-red-400">
             {form.errors.text}
