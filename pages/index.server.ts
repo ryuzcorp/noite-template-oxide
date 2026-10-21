@@ -20,5 +20,8 @@ export const action = defineHandler(async (c) => {
     return c.json({ errors: { text: "Write something first." } }, 422);
   }
   todos.push({ id: todos.length + 1, text: trimmed });
-  return c.json({ ok: true });
+  // Return nothing: Void re-runs the loader and answers with the page JSON
+  // (`X-VoidPages`), which the client applies in place. Returning data here
+  // would bypass the pages protocol and force a full-page reload, dropping
+  // every in-flight client script.
 });
